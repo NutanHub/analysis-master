@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analysis - MSBTE PaperHub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: #ffffff;
+            color: #1f2937;
+        }
+
+        /* Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 8rem 5% 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #6366f1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step-number.inactive {
+            background: #e5e7eb;
+            color: #9ca3af;
+        }
+
+        .step-number.completed {
+            background: #10b981;
+        }
+
+        .step-line {
+            width: 60px;
+            height: 2px;
+            background: #e5e7eb;
+        }
+
+        .step-line.active {
+            background: #6366f1;
+        }
+
+        .step-line.completed {
+            background: #10b981;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Analysis Container */
+        .analysis-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .analysis-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .analysis-icon {
+            font-size: 6rem;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .analysis-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .analysis-description {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            margin: 2rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        /* Steps List */
+        .steps-list {
+            text-align: left;
+            margin: 2rem 0;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .step-item:last-child {
+            border-bottom: none;
+        }
+
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .step-icon.pending {
+            background: #f3f4f6;
+            color: #9ca3af;
+        }
+
+        .step-icon.processing {
+            background: #6366f1;
+            color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        .step-icon.completed {
+            background: #10b981;
+            color: white;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .step-text {
+            flex: 1;
+        }
+
+        .step-text h4 {
+            margin-bottom: 0.25rem;
+            color: #1f2937;
+        }
+
+        .step-text p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* File Info */
+        .file-info {
+            background: #f8faff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+            border: 1px solid #e0e7ff;
+        }
+
+        .file-info h4 {
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .file-list {
+            list-style: none;
+        }
+
+        .file-list li {
+            padding: 0.25rem 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Action Button */
+        .action-button {
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .analysis-card {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <div class="logo-icon"><i class="fas fa-clipboard-check"></i></div>
+            <span>MSBTE PaperHub</span>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step">
+                <div class="step-number completed">1</div>
+            </div>
+            <div class="step-line completed"></div>
+            <div class="step">
+                <div class="step-number">2</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number inactive">3</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number inactive">4</div>
+            </div>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-brain"></i> AI Analysis in Progress</h1>
+            <p>Our AI engine is processing your papers with OCR, extracting questions, and analyzing patterns across multiple years using GPT-4</p>
+        </div>
+
+        <!-- Analysis Container -->
+        <div class="analysis-container">
+            <div class="analysis-card">
+                <div class="analysis-icon"><i class="fas fa-cog fa-spin"></i></div>
+                <div class="analysis-title">Analyzing Question Papers...</div>
+                <div class="analysis-description">Please wait while we process your uploaded papers and extract valuable insights.</div>
+                
+                <!-- Progress Bar -->
+                <div class="progress-section">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Initializing analysis... 0%</div>
+                </div>
+
+                <!-- File Info -->
+                <div class="file-info" id="file-info">
+                    <h4>Processing Files:</h4>
+                    <ul class="file-list" id="file-list">
+                        <!-- Files will be populated by JavaScript -->
+                    </ul>
+                </div>
+
+                <!-- Processing Steps -->
+                <div class="steps-list">
+                    <div class="step-item">
+                        <div class="step-icon pending" id="step1-icon">1</div>
+                        <div class="step-text">
+                            <h4><i class="fas fa-eye"></i> OCR Text Extraction</h4>
+                            <p>Converting images and PDFs to readable text</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-icon pending" id="step2-icon">2</div>
+                        <div class="step-text">
+                            <h4><i class="fas fa-search"></i> Question Identification</h4>
+                            <p>Using AI to identify and extract questions from papers</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-icon pending" id="step3-icon">3</div>
+                        <div class="step-text">
+                            <h4><i class="fas fa-chart-line"></i> Pattern Analysis</h4>
+                            <p>Analyzing question patterns across multiple years</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step-item">
+                        <div class="step-icon pending" id="step4-icon">4</div>
+                        <div class="step-text">
+                            <h4><i class="fas fa-calculator"></i> Weightage Calculation</h4>
+                            <p>Categorizing questions into High, Medium, and Low priority</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="action-button">
+                    <button class="btn btn-primary" id="continue-btn" disabled>
+                        <i class="fas fa-arrow-right"></i> Continue to Results
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let progress = 0;
+        let currentStep = 0;
+        const steps = [
+            { name: 'OCR Text Extraction', duration: 3000 },
+            { name: 'Question Identification', duration: 4000 },
+            { name: 'Pattern Analysis', duration: 3500 },
+            { name: 'Weightage Calculation', duration: 2500 }
+        ];
+
+        // Load analysis data from previous page
+        const analysisData = JSON.parse(sessionStorage.getItem('analysisData') || '{}');
+        
+        // Populate file info
+        function populateFileInfo() {
+            const fileList = document.getElementById('file-list');
+            if (analysisData.files && analysisData.files.length > 0) {
+                analysisData.files.forEach(fileName => {
+                    const li = document.createElement('li');
+                    li.textContent = fileName;
+                    fileList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'Sample question papers';
+                fileList.appendChild(li);
+            }
+
+            // Add analysis details
+            const details = document.createElement('div');
+            details.style.marginTop = '1rem';
+            details.innerHTML = `
+                <p><strong>Exam Type:</strong> ${analysisData.examType || 'GATE'}</p>
+                <p><strong>Subject:</strong> ${analysisData.subject || 'Computer Science'}</p>
+                <p><strong>Year Range:</strong> ${analysisData.yearFrom || '2020'} - ${analysisData.yearTo || '2024'}</p>
+            `;
+            document.getElementById('file-info').appendChild(details);
+        }
+
+        // Update progress bar
+        function updateProgress(percentage) {
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('progress-text').textContent = `${steps[currentStep]?.name || 'Processing'}... ${Math.round(percentage)}%`;
+        }
+
+        // Update step status
+        function updateStepStatus(stepIndex, status) {
+            const stepIcon = document.getElementById(`step${stepIndex + 1}-icon`);
+            stepIcon.className = `step-icon ${status}`;
+            
+                if (status === 'completed') {
+                    stepIcon.innerHTML = '<i class="fas fa-check"></i>';
+                } else if (status === 'processing') {
+                    stepIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                } else {
+                    stepIcon.textContent = stepIndex + 1;
+                }
+        }
+
+        // Simulate analysis process
+        function simulateAnalysis() {
+            let totalProgress = 0;
+            
+            function processStep(stepIndex) {
+                if (stepIndex >= steps.length) {
+                    // Analysis complete
+                    updateProgress(100);
+                    document.getElementById('continue-btn').disabled = false;
+                    document.getElementById('continue-btn').innerHTML = '<i class="fas fa-chart-bar"></i> View Results';
+                    document.getElementById('continue-btn').onclick = () => {
+                        // Generate mock results
+                        const mockResults = generateMockResults();
+                        sessionStorage.setItem('analysisResults', JSON.stringify(mockResults));
+                        window.location.href = 'results.html';
+                    };
+                    return;
+                }
+
+                updateStepStatus(stepIndex, 'processing');
+                
+                const step = steps[stepIndex];
+                const stepDuration = step.duration;
+                const stepProgress = 25; // Each step is 25% of total progress
+                const startProgress = totalProgress;
+                
+                let stepStartTime = Date.now();
+                
+                const stepInterval = setInterval(() => {
+                    const elapsed = Date.now() - stepStartTime;
+                    const stepProgressPercent = Math.min(elapsed / stepDuration, 1);
+                    const currentProgress = startProgress + (stepProgress * stepProgressPercent);
+                    
+                    updateProgress(currentProgress);
+                    
+                    if (stepProgressPercent >= 1) {
+                        clearInterval(stepInterval);
+                        updateStepStatus(stepIndex, 'completed');
+                        totalProgress += stepProgress;
+                        currentStep = stepIndex + 1;
+                        
+                        // Move to next step after a brief pause
+                        setTimeout(() => processStep(stepIndex + 1), 500);
+                    }
+                }, 100);
+            }
+            
+            // Start processing
+            processStep(0);
+        }
+
+        // Generate mock results
+        function generateMockResults() {
+            return {
+                analysisId: 'analysis_' + Date.now(),
+                examType: analysisData.examType || 'GATE',
+                subject: analysisData.subject || 'Computer Science',
+                yearRange: `${analysisData.yearFrom || '2020'} - ${analysisData.yearTo || '2024'}`,
+                totalQuestions: 85,
+                categories: {
+                    high: {
+                        count: 23,
+                        questions: [
+                            { text: 'What is the time complexity of merge sort?', marks: 10, years: ['2021', '2022', '2024'], frequency: '75%' },
+                            { text: 'Explain the concept of virtual memory.', marks: 8, years: ['2020', '2022', '2023'], frequency: '60%' },
+                            { text: 'Describe the OSI model layers.', marks: 12, years: ['2021', '2023', '2024'], frequency: '75%' }
+                        ]
+                    },
+                    medium: {
+                        count: 35,
+                        questions: [
+                            { text: 'Compare IPv4 and IPv6 protocols.', marks: 6, years: ['2022', '2024'], frequency: '40%' },
+                            { text: 'What are the principles of object-oriented programming?', marks: 8, years: ['2021', '2023'], frequency: '40%' }
+                        ]
+                    },
+                    low: {
+                        count: 27,
+                        questions: [
+                            { text: 'Explain the concept of polymorphism.', marks: 4, years: ['2020'], frequency: '20%' },
+                            { text: 'What is a hash table?', marks: 5, years: ['2021'], frequency: '20%' }
+                        ]
+                    }
+                },
+                insights: [
+                    'Data Structures and Algorithms questions appear in 80% of papers',
+                    'Operating Systems concepts have increased in frequency over the years',
+                    'Network protocols questions are becoming more important'
+                ]
+            };
+        }
+
+        // Initialize the page
+        populateFileInfo();
+        
+        // Start analysis simulation after a brief delay
+        setTimeout(() => {
+            simulateAnalysis();
+        }, 1000);
+    </script>
+</body>
+</html>

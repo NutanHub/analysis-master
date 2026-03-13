@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Papers - MSBTE PaperHub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: #ffffff;
+            color: #1f2937;
+        }
+
+        /* Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #6b7280;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #6366f1;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 8rem 5% 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #6366f1;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step-number.inactive {
+            background: #e5e7eb;
+            color: #9ca3af;
+        }
+
+        .step-line {
+            width: 60px;
+            height: 2px;
+            background: #e5e7eb;
+        }
+
+        .step-line.active {
+            background: #6366f1;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Upload Section */
+        .upload-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .upload-area {
+            border: 3px dashed #c7d2fe;
+            border-radius: 1.5rem;
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #f8faff 0%, #f1f5ff 100%);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.03) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .upload-area:hover::before {
+            opacity: 1;
+        }
+
+        .upload-area:hover {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.1);
+        }
+
+        .upload-area.dragover {
+            border-color: #4f46e5;
+            background: #e0e7ff;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #6366f1;
+        }
+
+        .upload-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .upload-hint {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .select-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .select-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* File List */
+        .file-list {
+            margin-bottom: 2rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            padding: 1.25rem;
+            background: white;
+            border: 2px solid #f1f5f9;
+            border-radius: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        
+        .file-item:hover {
+            border-color: #e0e7ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .file-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: #e0e7ff;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6366f1;
+        }
+
+        .file-details h4 {
+            margin-bottom: 0.25rem;
+            color: #1f2937;
+        }
+
+        .file-details p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .remove-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Form Section */
+        .form-section {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f1f5f9;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .form-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.95rem;
+            letter-spacing: 0.025em;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            background: #fafbff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .form-group select:hover,
+        .form-group input:hover {
+            border-color: #9ca3af;
+            background: white;
+        }
+
+        .years-input {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .years-input input {
+            flex: 1;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        /* User Header Styles */
+        .user-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-details span:first-child {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .user-details span:last-child {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        /* Adjust main content when user header is visible */
+        .main.with-user-header {
+            padding-top: 8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                padding: 6rem 1rem 2rem;
+            }
+            
+            .main.with-user-header {
+                padding-top: 9rem;
+            }
+
+            .upload-area {
+                padding: 2rem 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .years-input {
+                flex-direction: column;
+            }
+            
+            .user-header {
+                padding: 1rem;
+            }
+            
+            .user-info {
+                gap: 0.75rem;
+            }
+            
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+            }
+        }
+    </style>
+    </head>
+<body>
+    <!-- IMMEDIATE AUTHENTICATION CHECK - Must be first -->
+    <script>
+        // Block access immediately if not authenticated
+        (function() {
+            const token = localStorage.getItem('paperscope_token');
+            const user = localStorage.getItem('paperscope_user');
+            if (!token || !user) {
+                sessionStorage.setItem('redirectAfterLogin', window.location.href);
+                alert('⚠️ Authentication Required\n\nPlease sign up or log in to access the upload page.');
+                window.location.replace('signup.html');
+            }
+        })();
+    </script>
+    
+    <!-- Load MVC Structure -->
+    <script src="../app.js"></script>
+    
+    <!-- User Profile Header -->
+    <div class="user-header" id="user-header" style="display: none;">
+        <div class="user-info">
+            <img id="user-avatar" src="" alt="User Avatar" class="user-avatar">
+            <div class="user-details">
+                <span id="user-name"></span>
+                <span id="user-email"></span>
+            </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <div class="logo-icon"><i class="fas fa-clipboard-check"></i></div>
+            <span>MSBTE PaperHub</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#how-it-works">How it Works</a></li>
+            <li><a href="index.html#feedback">Feedback</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step">
+                <div class="step-number">1</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number inactive">2</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number inactive">3</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number inactive">4</div>
+            </div>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-upload"></i> Upload Question Papers</h1>
+            <p>Upload multiple question papers in PDF or image format from different years. Supported formats: MSBT, Mumbai University, GATE</p>
+        </div>
+
+        <!-- Upload Container -->
+        <div class="upload-container">
+            <!-- Status Messages -->
+            <div id="status-message" style="display: none;"></div>
+
+            <!-- Upload Area -->
+            <div class="upload-area" id="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Drop files here or click to upload</div>
+                <div class="upload-hint">Supports PDF, JPG, PNG (Max 50MB each)</div>
+                <button class="select-btn" type="button"><i class="fas fa-folder-open"></i> Select Files</button>
+            </div>
+            
+            <input type="file" id="fileInput" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png">
+
+            <!-- File List -->
+            <div class="file-list" id="file-list"></div>
+
+            <!-- Form Section -->
+            <div class="form-section">
+                <h3 style="margin-bottom: 1.5rem; color: #1f2937; text-align: center;">Analysis Configuration</h3>
+                <p style="text-align: center; margin-bottom: 2rem; color: #6b7280;">Configure your MSBTE paper analysis preferences</p>
+                
+                <div class="form-group">
+                    <label for="exam-type">Exam Type</label>
+                    <select id="exam-type" required>
+                        <option value="MSBTE">MSBTE (Maharashtra State Board of Technical Education)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="course">Course</label>
+                    <select id="course" required>
+                        <option value="">Select Course</option>
+                        <option value="Computer Engineering">Computer Engineering</option>
+                        <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
+                        <option value="Electronics & Telecommunication Engineering">Electronics & Telecommunication Engineering</option>
+                        <option value="Information Technology">Information Technology</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="scheme">MSBTE Scheme</label>
+                    <select id="scheme" required>
+                        <option value="">Select MSBTE Scheme</option>
+                        <option value="K Scheme">K Scheme</option>
+                        <option value="I Scheme">I Scheme</option>
+                        <option value="F Scheme">F Scheme</option>
+                        <option value="J Scheme">J Scheme</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" placeholder="e.g., Data Structures, Mechanical Engineering Drawing, Machine Learning" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="year">Year</label>
+                    <input type="number" id="year" placeholder="e.g., 2023" min="1900" max="2100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="total-marks">Total Marks</label>
+                    <input type="number" id="total-marks" placeholder="e.g., 100" min="1" required>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="index.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                <button class="btn btn-primary" id="start-analysis" disabled><i class="fas fa-brain"></i> Start AI Analysis</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let uploadedFiles = [];
+
+        // File input handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('upload-area');
+        const fileList = document.getElementById('file-list');
+        const startButton = document.getElementById('start-analysis');
+        const statusMessage = document.getElementById('status-message');
+
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            files.forEach(file => {
+                if (validateFile(file)) {
+                    uploadedFiles.push(file);
+                    addFileToList(file);
+                }
+            });
+            updateStartButton();
+        }
+
+        function validateFile(file) {
+            const maxSize = 50 * 1024 * 1024; // 50MB
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            
+            if (file.size > maxSize) {
+                showMessage('File too large: ' + file.name + ' (Max 50MB)', 'error');
+                return false;
+            }
+            
+            if (!allowedTypes.includes(file.type)) {
+                showMessage('Invalid file type: ' + file.name, 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function addFileToList(file) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <div class="file-icon"><i class="fas ${file.type.includes('pdf') ? 'fa-file-pdf' : 'fa-file-image'}"></i></div>
+                    <div class="file-details">
+                        <h4>${file.name}</h4>
+                        <p>${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                </div>
+                <button class="remove-btn" onclick="removeFile('${file.name}')"><i class="fas fa-trash"></i> Remove</button>
+            `;
+            fileList.appendChild(fileItem);
+        }
+
+        function removeFile(fileName) {
+            uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+            renderFileList();
+            updateStartButton();
+        }
+
+        function renderFileList() {
+            fileList.innerHTML = '';
+            uploadedFiles.forEach(file => addFileToList(file));
+        }
+
+        function updateStartButton() {
+            const examType = document.getElementById('exam-type').value;
+            const course = document.getElementById('course').value;
+            const scheme = document.getElementById('scheme').value;
+            const subject = document.getElementById('subject').value;
+            const yearVal = document.getElementById('year').value;
+            const marksVal = document.getElementById('total-marks').value;
+            const year = parseInt(yearVal, 10);
+            const totalMarks = parseInt(marksVal, 10);
+            const yearValid = Number.isInteger(year) && year >= 1900 && year <= 2100;
+            const marksValid = Number.isInteger(totalMarks) && totalMarks > 0;
+            
+            const isValid = uploadedFiles.length > 0 && examType && course && scheme && subject && yearValid && marksValid;
+            startButton.disabled = !isValid;
+        }
+
+        // Form validation
+        document.getElementById('exam-type').addEventListener('change', updateStartButton);
+        document.getElementById('course').addEventListener('change', updateStartButton);
+        document.getElementById('scheme').addEventListener('change', updateStartButton);
+        document.getElementById('subject').addEventListener('input', updateStartButton);
+        document.getElementById('year').addEventListener('input', updateStartButton);
+        document.getElementById('total-marks').addEventListener('input', updateStartButton);
+
+        // Start analysis
+        startButton.addEventListener('click', async () => {
+            if (uploadedFiles.length === 0) {
+                showMessage('Please upload at least one question paper', 'error');
+                return;
+            }
+            
+            startButton.disabled = true;
+            startButton.textContent = 'Uploading...';
+            showMessage('Uploading files...', 'info');
+            
+            try {
+                // Upload each file
+                const uploadPromises = uploadedFiles.map(file => {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('title', document.getElementById('subject').value);
+                    formData.append('subject', document.getElementById('subject').value);
+                    formData.append('course', document.getElementById('course').value);
+                    formData.append('scheme', document.getElementById('scheme').value);
+                    formData.append('examType', document.getElementById('exam-type').value);
+                    formData.append('year', document.getElementById('year').value);
+                    formData.append('totalMarks', document.getElementById('total-marks').value);
+                    
+                    return apiService.uploadFile('/papers/upload', formData);
+                });
+                
+                const results = await Promise.all(uploadPromises);
+                
+                showMessage('Files uploaded successfully! Starting analysis...', 'success');
+                
+                // Immediately analyze the first uploaded paper
+                if (results.length > 0) {
+                    // Redirect to analysis results page which will trigger analysis
+                    setTimeout(() => {
+                        window.location.href = 'analysis-results.html?paperId=' + results[0].data._id;
+                    }, 1500);
+                }
+            } catch (error) {
+                showMessage(error.message || 'Upload failed. Please try again.', 'error');
+                startButton.disabled = false;
+                startButton.textContent = 'Start AI Analysis';
+            }
+        });
+
+        function showMessage(message, type) {
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Authentication and user profile functions
+        function displayUserProfile(user) {
+            document.getElementById('user-name').textContent = user.name;
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('user-avatar').src = user.avatar_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Ccircle cx="20" cy="20" r="20" fill="%236366f1"/%3E%3Ctext x="20" y="26" font-family="Arial" font-size="18" fill="white" text-anchor="middle"%3E' + (user.name ? user.name.charAt(0).toUpperCase() : 'U') + '%3C/text%3E%3C/svg%3E';
+            document.getElementById('user-header').style.display = 'flex';
+            document.querySelector('.main').classList.add('with-user-header');
+        }
+        
+        async function logout() {
+            try {
+                await authController.logout();
+                showMessage('Successfully logged out', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            } catch (error) {
+                console.error('Logout error:', error);
+                showMessage('Error during logout', 'error');
+            }
+        }
+        
+        // Check authentication on page load - REQUIRED
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Protect this page - redirect to signup if not authenticated
+            if (!authController.isAuthenticated()) {
+                // Store intended destination
+                sessionStorage.setItem('redirectAfterLogin', window.location.href);
+                // Show message and redirect to signup
+                alert('Please sign up or log in to access the upload page.');
+                window.location.href = 'signup.html';
+                return;
+            }
+            
+            // User is authenticated, display their profile
+            const user = authController.getUser();
+            if (user) {
+                displayUserProfile(user);
+            } else {
+                // Try to fetch user from server
+                const serverUser = await authController.getCurrentUser();
+                if (serverUser) {
+                    displayUserProfile(serverUser);
+                } else {
+                    // Token invalid, redirect to login
+                    sessionStorage.setItem('redirectAfterLogin', window.location.href);
+                    alert('Your session has expired. Please log in again.');
+                    window.location.href = 'login.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

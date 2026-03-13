@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - MSBTE PaperHub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: #ffffff;
+            color: #1f2937;
+        }
+
+        /* Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 8rem 5% 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step-line {
+            width: 60px;
+            height: 2px;
+            background: #10b981;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Results Container */
+        .results-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .summary-card.high {
+            border-left: 4px solid #ef4444;
+        }
+
+        .summary-card.medium {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .summary-card.low {
+            border-left: 4px solid #10b981;
+        }
+
+        .summary-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-number.high { color: #ef4444; }
+        .summary-number.medium { color: #f59e0b; }
+        .summary-number.low { color: #10b981; }
+
+        .summary-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* Category Sections */
+        .category-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 2rem;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .category-icon.high { background: #fee2e2; color: #ef4444; }
+        .category-icon.medium { background: #fef3c7; color: #f59e0b; }
+        .category-icon.low { background: #d1fae5; color: #10b981; }
+
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .category-title.high { color: #ef4444; }
+        .category-title.medium { color: #f59e0b; }
+        .category-title.low { color: #10b981; }
+
+        .category-count {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Question List */
+        .question-list {
+            space-y: 1rem;
+        }
+
+        .question-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background: #fafafa;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .question-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .year-tags {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .year-tag {
+            background: #e0e7ff;
+            color: #6366f1;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+
+        /* Insights Section */
+        .insights-section {
+            background: linear-gradient(135deg, #f8faff, #e0e7ff);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid #c7d2fe;
+            margin-bottom: 2rem;
+        }
+
+        .insights-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .insights-list {
+            list-style: none;
+        }
+
+        .insights-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        /* Authentication Modal */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .auth-modal.show {
+            display: flex;
+        }
+
+        .auth-modal-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-modal-icon {
+            font-size: 4rem;
+            color: #6366f1;
+            margin-bottom: 1rem;
+        }
+
+        .auth-modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-modal-description {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .auth-modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .modal-btn-secondary {
+            background: white;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #6366f1;
+            color: white;
+        }
+
+        .modal-close {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .modal-close:hover {
+            background: #e5e7eb;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .question-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .auth-modal-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <div class="logo-icon"><i class="fas fa-clipboard-check"></i></div>
+            <span>MSBTE PaperHub</span>
+        </a>
+        <div class="nav-user-info" id="nav-user-info" style="display: none;">
+            <span class="user-email" id="user-email"></span>
+            <button class="logout-btn" onclick="logout()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step">
+                <div class="step-number">1</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number">2</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number">3</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <div class="step-number">4</div>
+            </div>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-chart-line"></i> Weightage Analysis Results</h1>
+            <p>Questions categorized into High, Medium, and Low weightage based on frequency and importance analysis</p>
+        </div>
+
+        <!-- Results Container -->
+        <div class="results-container">
+            <!-- Analysis Summary -->
+            <div class="summary-cards">
+                <div class="summary-card high">
+                    <div class="summary-number high" id="high-count">23</div>
+                    <div class="summary-label">High Priority</div>
+                </div>
+                <div class="summary-card medium">
+                    <div class="summary-number medium" id="medium-count">35</div>
+                    <div class="summary-label">Medium Priority</div>
+                </div>
+                <div class="summary-card low">
+                    <div class="summary-number low" id="low-count">27</div>
+                    <div class="summary-label">Low Priority</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-number" id="total-count">85</div>
+                    <div class="summary-label">Total Questions</div>
+                </div>
+            </div>
+
+            <!-- Insights Section -->
+            <div class="insights-section">
+                <h3 class="insights-title"><i class="fas fa-lightbulb"></i> Key Insights</h3>
+                <ul class="insights-list" id="insights-list">
+                    <!-- Insights will be populated by JavaScript -->
+                </ul>
+            </div>
+
+            <!-- High Priority Questions -->
+            <div class="category-section">
+                <div class="category-header">
+                    <div class="category-icon high"><i class="fas fa-fire"></i></div>
+                    <h2 class="category-title high">High Weightage Questions</h2>
+                    <span class="category-count" id="high-category-count">23 questions</span>
+                </div>
+                <div class="question-list" id="high-questions">
+                    <!-- High priority questions will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Medium Priority Questions -->
+            <div class="category-section">
+                <div class="category-header">
+                    <div class="category-icon medium"><i class="fas fa-star"></i></div>
+                    <h2 class="category-title medium">Medium Weightage Questions</h2>
+                    <span class="category-count" id="medium-category-count">35 questions</span>
+                </div>
+                <div class="question-list" id="medium-questions">
+                    <!-- Medium priority questions will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Low Priority Questions -->
+            <div class="category-section">
+                <div class="category-header">
+                    <div class="category-icon low"><i class="fas fa-file-alt"></i></div>
+                    <h2 class="category-title low">Low Weightage Questions</h2>
+                    <span class="category-count" id="low-category-count">27 questions</span>
+                </div>
+                <div class="question-list" id="low-questions">
+                    <!-- Low priority questions will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="downloadReport()"><i class="fas fa-file-pdf"></i> Download PDF Report</button>
+                <a href="#" onclick="window.authGuard.navigateToProtectedPage('/upload.html'); return false;" class="btn btn-secondary"><i class="fas fa-redo"></i> Analyze More Papers</a>
+                <a href="index.html" class="btn btn-secondary"><i class="fas fa-home"></i> Back to Home</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Authentication Modal -->
+    <div class="auth-modal" id="auth-modal">
+        <div class="auth-modal-content">
+            <div class="auth-modal-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h3 class="auth-modal-title">Authentication Required</h3>
+            <p class="auth-modal-description">
+                You need to create an account or log in to download the PDF report. This helps us provide you with personalized analysis and save your reports for future reference.
+            </p>
+            <div class="auth-modal-buttons">
+                <a href="signup.html" class="modal-btn modal-btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Create Account</span>
+                </a>
+                <a href="login.html" class="modal-btn modal-btn-secondary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Log In</span>
+                </a>
+            </div>
+            <button class="modal-close" onclick="closeAuthModal()">
+                Maybe Later
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Load results data
+        const results = JSON.parse(sessionStorage.getItem('analysisResults') || '{}');
+
+        function populateResults() {
+            // Update summary counts
+            document.getElementById('high-count').textContent = results.categories?.high?.count || 0;
+            document.getElementById('medium-count').textContent = results.categories?.medium?.count || 0;
+            document.getElementById('low-count').textContent = results.categories?.low?.count || 0;
+            document.getElementById('total-count').textContent = results.totalQuestions || 0;
+
+            // Update category counts
+            document.getElementById('high-category-count').textContent = `${results.categories?.high?.count || 0} questions`;
+            document.getElementById('medium-category-count').textContent = `${results.categories?.medium?.count || 0} questions`;
+            document.getElementById('low-category-count').textContent = `${results.categories?.low?.count || 0} questions`;
+
+            // Populate insights
+            const insightsList = document.getElementById('insights-list');
+            if (results.insights) {
+                results.insights.forEach(insight => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<i class="fas fa-lightbulb"></i> ${insight}`;
+                    insightsList.appendChild(li);
+                });
+            }
+
+            // Populate questions for each category
+            populateQuestions('high', results.categories?.high?.questions || []);
+            populateQuestions('medium', results.categories?.medium?.questions || []);
+            populateQuestions('low', results.categories?.low?.questions || []);
+        }
+
+        function populateQuestions(category, questions) {
+            const container = document.getElementById(`${category}-questions`);
+            
+            questions.forEach(question => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-item';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${question.text}</div>
+                    <div class="question-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-trophy"></i>
+                            <span>${question.marks} marks</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Years:</span>
+                            <div class="year-tags">
+                                ${question.years.map(year => `<span class="year-tag">${year}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Frequency: ${question.frequency}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function downloadReport() {
+            // Check if user is logged in
+            const userLoggedIn = sessionStorage.getItem('userLoggedIn');
+            const userEmail = sessionStorage.getItem('userEmail');
+            
+            if (!userLoggedIn || userLoggedIn !== 'true' || !userEmail) {
+                showAuthModal();
+                return;
+            }
+            
+            // User is logged in, proceed with download
+            const blob = new Blob(['MSBTE PaperHub Analysis Report - Generated on ' + new Date().toDateString()], {
+                type: 'text/plain'
+            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `MSBTE_PaperHub_Analysis_Report_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            alert('📄 Report downloaded successfully! In a real implementation, this would be a formatted PDF with charts and detailed analysis.');
+        }
+
+        function showAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            modal.classList.add('show');
+            
+            // Add event listener to close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeAuthModal();
+                }
+            });
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            modal.classList.remove('show');
+        }
+
+        function logout() {
+            // Clear user session
+            sessionStorage.removeItem('userLoggedIn');
+            sessionStorage.removeItem('userEmail');
+            sessionStorage.removeItem('userName');
+            sessionStorage.removeItem('userType');
+            sessionStorage.removeItem('analysisData');
+            sessionStorage.removeItem('analysisResults');
+            
+            // Redirect to home page
+            window.location.href = 'index.html';
+        }
+
+        // Initialize the page
+        populateResults();
+        
+        // Check if user is logged in and show user info if available
+        const userLoggedIn = sessionStorage.getItem('userLoggedIn');
+        const userEmail = sessionStorage.getItem('userEmail');
+        
+        if (userLoggedIn === 'true' && userEmail) {
+            // Show user info in navigation
+            document.getElementById('nav-user-info').style.display = 'flex';
+            document.getElementById('nav-user-info').style.alignItems = 'center';
+            document.getElementById('user-email').textContent = userEmail;
+            console.log('User is logged in as:', userEmail);
+        }
+    </script>
+    
+    <!-- Authentication Guard -->
+    <script src="js/auth-guard.js"></script>
+</body>
+</html>
